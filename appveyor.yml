@@ -1,0 +1,35 @@
+# Arduino ile Appveyor Continuous Integration Kullanımı
+# Bu dosyayı şekillendirerek kendi projenize Appveyor CI servisini entegre edebilirsiniz.
+# Bu yöntem PlatformIO servisinin altyapısını kullanmaktadır.
+#
+# Kerim Kaan Dönmez - http://kerimkaan.com/arduino-ile-appveyor-kullanimi/
+
+build: off
+environment:
+
+  matrix:
+    # Burada source dosyalarımızı veya folderlarımızı ekleyebiliyoruz.
+    - PLATFORMIO_CI_SRC: "Dosyayolu.ino"
+
+
+
+install:
+  # Kurulum ayarları
+  - cmd: git submodule update --init --recursive
+  - cmd: SET PATH=%PATH%;C:\Python27\Scripts
+  # PlatformIO kurulumu
+  - cmd: pip install -U https://github.com/platformio/platformio/archive/develop.zip
+  # PlatformIO'nun hangi platform ile çalışacağı ve bunun indirilme & kurulma işlemleri
+  # Arduino UNO, Mega vb. ATMEL AVR platformudur.
+  - cmd: platformio platform install https://github.com/platformio/platform-atmelavr.git
+  # PlatformIO için Arduino projenizde kullandığınız kütüphanelerin yüklenmesi işlemleri
+  # PlatformIO kütüphanelere ID vermiştir. Kullandığınız kütüphaneleri sitesinden bulabilirsiniz.
+  # Aşağıda bulunanlar:
+  # 19 - DHT Sensor Library: http://platformio.org/lib/show/19/DHT%20sensor%20library
+  # 4 - IRremote: http://platformio.org/lib/show/4/IRremote
+  # 31 - Adafruit Unified Sensor: https://platformio.org/lib/show/31/Adafruit%20Unified%20Sensor
+  - cmd: platformio lib -g install 31 19 4
+
+test_script:
+  # Test edilecek boardlar: (Başka boardlarda denemek isterseniz PlatformIO dökümanlarını kontrol ediniz.)
+  - cmd: platformio ci --board=uno  --board=leonardo --board=megaatmega2560 --board=megaatmega1280
